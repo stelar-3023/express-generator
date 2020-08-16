@@ -5,6 +5,8 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
+const passport = require("passport");
+const authenticate = require("./authenticate");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -37,39 +39,36 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser("12345-67890-09876-54321"));
-app.use(session({
-  name: "session-id",
-  secret: "12345-67890-09876-54321",
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
+app.use(
+  session({
+    name: "session-id",
+    secret: "12345-67890-09876-54321",
+    saveUninitialized: false,
+    resave: false,
+    store: new FileStore(),
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 // this is where we'll add authentication
 function auth(req, res, next) {
-  console.log(req.session)
+  console.log(req.user);
 
-  if (!req.session.user) {
-      const err = new Error("You are not authenticated!");
-      err.status = 401;
-      return next(err);
-
+  if (!req.user) {
+    const err = new Error("You are not authenticated!");
+    err.status = 401;
+    return next(err);
   } else {
-    if (req.session.user === "authenticated") {
-      return next();
-    } else {
-      const err = new Error("You are not autheticated!");
-      err.status = 401;
-      return next(err);
-    }
+    return next();
   }
 }
 
 app.use(auth);
 app.use(express.static(path.join(__dirname, "public")));
-
 
 app.use("/campsites", campsiteRouter);
 app.use("/promotions", promotionRouter);
