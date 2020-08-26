@@ -204,7 +204,7 @@ campsiteRouter
           if (
             campsite.comments
               .id(req.params.commentId)
-              .author._id.equals(req.user_id)
+              .author._id.equals(req.user._id)
           ) {
             if (req.body.rating) {
               campsite.comments.id(req.params.commentId).rating =
@@ -247,7 +247,7 @@ campsiteRouter
           if (
             campsite.comments
               .id(req.params.commentId)
-              .author._id.equals(req.user_id)
+              .author._id.equals(req.user._id)
           ) {
             campsite.comments.id(req.params.commentId).remove();
             campsite
